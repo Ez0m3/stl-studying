@@ -1,0 +1,26 @@
+# .gitignore 文件内容
+
+# 编译输出
+bin/
+obj/
+Debug/
+Release/
+*.exe
+*.out
+*.o
+
+# IDE配置
+.vscode/
+*.code-workspace
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.log
+
+# 平台特定
+__pycache__/
+*.py[cod]
