@@ -27,4 +27,5 @@ Thumbs.db
 
 # 平台特定
 __pycache__/
-*.py[cod]
+*.py[cod]output/
+*.exe
