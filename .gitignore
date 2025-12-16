@@ -10,7 +10,11 @@ Release/
 *.o
 
 # IDE配置
-.vscode/
+# VSCode配置 - 选择性共享
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/c_cpp_properties.json
 *.code-workspace
 
 # 系统文件
