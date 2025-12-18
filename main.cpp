@@ -1,13 +1,15 @@
 #include<iostream>
-void test()
+#include<string>
+void cintest()
 {
-    std::cout<<"123";
-    std::cout<<"456";
-    std::cout<<std::endl;
-    std::cout<<"123";
+   std::cout<<"abc1";
+   std::cout<<"abc2"<<std::endl;
+   std::cout<<"abc3";
 }
 int main()
 {
-    test();
+    cintest();
+    std::cout<<std::endl;
+    std::cout<<"abc4";
     return 0;
 }
