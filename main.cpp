@@ -1,14 +1,10 @@
 #include<iostream>
 void test()
 {
-    try
-    {
-        throw std::runtime_error("我肚子饿了");
-    }
-    catch(const std::exception& e)
-    {
-        std::cout<<e.what();
-    }   
+    std::cout<<"123";
+    std::cout<<"456";
+    std::cout<<std::endl;
+    std::cout<<"123";
 }
 int main()
 {
