@@ -3,21 +3,27 @@
 #include<utility>
 class person
 {
-    private:
-    int x=1;
-    int y=2;
     public:
+    int x;
+    int y=5;
     person():x(3)
     {
-        x=4;
-        y=5;
+        std::cout<<"x的地址是"<<&x<<std::endl;
+        std::cout<<"y的地址是"<<&y<<std::endl;
+        std::cout<<"this的地址是"<<this<<std::endl;
     }
-    void showinfo()
+    int* getads()
     {
-        std::cout<<x<<"  "<<y<<"\n";
+        return &y;
     }
 };
 int main()
 {
-    person().showinfo();
+    const int &a=person().x;
+    std::cout<<a<<std::endl;
+    std::cout<<&a<<std::endl;
+    int* b=person().getads();
+    *(b-3)=10;
+    std::cout<<a<<std::endl;
+    std::cout<<*b<<std::endl;
 }
