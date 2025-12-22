@@ -10,103 +10,53 @@ void reverse(string& s)
         s[s.size()-i-1]=temp;
     }
 }
-string myadd(string& s1,string& s2)
+string myadd(const string& s1,const string& s2)
 {
-    reverse(s1);
-    reverse(s2);
+    int size1=s1.size();
+    int size2=s2.size();
+    int maxsize=size1>size2?size1:size2;
     string sum;
-    string& l=(s1.size()>s2.size())?s1:s2;
-    string& s=(s1.size()<=s2.size())?s1:s2;
-    int temp=0;
-    int next=0;
-    for(size_t i=0;i<l.size();i++)
+    int ret=0;
+    for(int i=0;i<=maxsize;i++)
     {
-        if(i<s.size())
+        if(i<size1)
         {
-            temp=l[i]+s[i]-'0'-'0'+next;
-            next=temp/10;
+            ret+=s1[size1-i-1]-'0';
         }
-        else if(i>=s.size()&&i<l.size())
+        if(i<size2)
         {
-            temp=l[i]-'0'+next;
-            next=temp/10;
+            ret+=s2[size2-i-1]-'0';
         }
-        sum.push_back(temp%10+'0');
-    }
-    if(next)
-    {
-        sum.push_back(next+'0');
+        if(i<maxsize||ret>0)
+        {
+            sum.push_back(ret%10+'0');
+        }
+        ret/=10;
     }
     reverse(sum);
-        for(const auto& c:sum)
-    {
-        std::cout<<c;
-    }
-        std::cout<<"\n";
-    for(const auto& c:l)
+    for(auto c:sum)
     {
         std::cout<<c;
     }
     std::cout<<"\n";
-    for(const auto& c:s)
-    {
-        std::cout<<c;
-    }
-    return sum; 
+    return sum;
+}
+string mysub(const string& s1,const string& s2)
+{
+
+}
+void menu()
+{
+    string s1,s2;
+    std::cout<<"请输入高精度整数"<<"\n";
+    std::cin>>s1;
+
+    std::cout<<"请输入高精度整数"<<"\n";
+    std::cin>>s2;
+    string sum=myadd(s1,s2);
+    //string sub=mysub(s1,s2);
 }
 int main()
 {
-    string s1,s2,s3;
-    std::cin>>s1>>s2;
-    s3=myadd(s1,s2);
+    menu();
 }
-
-
-// ========== 高精度加法优化指南 ==========
-// 
-// 优化点总结：
-// 1. 内存预分配：sum.reserve(max(s1.size(), s2.size()) + 1);
-// 2. 使用标准库reverse：reverse(s.begin(), s.end());
-// 3. 避免复杂分支：分别处理两个字符串，不用else if
-// 4. 变量命名清晰：用carry代替next表示进位
-// 5. 使用size_t避免符号警告
-// 6. 考虑不修改输入参数：传值代替传引用
-// 7. 提前计算max_len减少重复计算
-// 
-// 优化版本示例：
-// #include <algorithm>  // 需要包含这个头文件
-
-// string myadd_optimized(string s1, string s2) {
-//     // 使用标准库reverse
-//     reverse(s1.begin(), s1.end());
-//     reverse(s2.begin(), s2.end());
-    
-//     // 预分配内存（重要！）
-//     string sum;
-//     size_t max_len = max(s1.size(), s2.size());
-//     sum.reserve(max_len + 1);  // +1为可能的进位
-    
-//     // 清晰变量名，避免复杂分支
-//     int carry = 0;
-//     for(size_t i = 0; i < max_len; i++) {
-//         int digit_sum = carry;  // 每次重置
-        
-//         // 分别处理，不用else if
-//         if(i < s1.size()) digit_sum += s1[i] - '0';
-//         if(i < s2.size()) digit_sum += s2[i] - '0';
-        
-//         sum.push_back((digit_sum % 10) + '0');
-//         carry = digit_sum / 10;
-//     }
-    
-//     // 处理最后进位
-//     if(carry > 0) {
-//         sum.push_back(carry + '0');
-//     }
-    
-//     reverse(sum.begin(), sum.end());
-//     return sum;  // 不修改输入，直接返回结果
-// }
-// 
-// 小数据（<100位）时差异不大，大数据时优化明显
-// =========================================
