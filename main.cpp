@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include<limits>
 using std::string;
 void reverse(string& s)
 {
@@ -23,21 +24,21 @@ bool compare(const string& s1,const string& s2)
     }
     return true;
 }
-string myadd(const string& s1,const string& s2)
+string myadd(const string& a,const string& b)
 {
-    int i=s1.size()-1;
-    int j=s2.size()-1;
+    int i=a.size()-1;
+    int j=b.size()-1;
     string sum;
     int carry=0;
     while(i>=0||j>=0||carry>0)
     {
         if(i>=0)
         {
-            carry+=s1[i--]-'0';
+            carry+=a[i--]-'0';
         }
         if(j>=0)
         {
-            carry+=s2[j--]-'0';
+            carry+=b[j--]-'0';
         }
         sum.push_back(carry%10+'0');
         carry/=10;
@@ -81,6 +82,38 @@ string mysub(const string& a,const string& b)
     reverse(diff);
     return diff;
 }
+string mymul(const string& a,const string& b)
+{
+    if(a=="0"||b=="0")return "0";
+    string mul;
+    int n=a.size()-1;
+    int m=b.size()-1;
+    int* temp=new int[n+m+2]();
+    for(int i=n;i>=0;i--)
+    {
+        for(int j=m;j>=0;j--)
+        {
+            int carry=(a[i]-'0')*(b[j]-'0');
+            int sum=carry+temp[i+j+1];
+            temp[i+j+1]=sum%10;
+            temp[i+j]+=sum/10;
+        }
+    }
+    for(int i=0;i<=n+m+1;i++)
+    {
+        mul.push_back(temp[n+m+1-i]+'0');
+    }
+    while(mul.back()=='0'&&mul.size()>1)mul.pop_back();
+    delete[] temp;
+    reverse(mul);
+    return mul;
+}
+string mydiv(const string& a,const string& b)
+{return a;}
+void print()
+{
+    std::cout<<"输入：1.加法2.减法3.乘法4.除法0.退出"<<"\n";
+}
 void menu()
 {
     string s1,s2;
@@ -88,12 +121,48 @@ void menu()
     std::cin>>s1;
     std::cout<<"请输入高精度整数"<<"\n";
     std::cin>>s2;
-    string sub=mysub(s1,s2);
-    for(auto c:sub)
+    print();
+    while(true)
     {
-        std::cout<<c;
+        int op;
+        if(!(std::cin>>op))
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout<<"非法输入，请输入0~4"<<'\n';
+            continue;
+        }
+        if(op<0||op>4)
+        {
+            std::cout<<"非法输入，请输入0~4"<<'\n';
+            continue;
+        }
+        if(op==0)
+        {
+            std::cout<<"退出运算"<<"\n";
+        }
+        if(op==1)
+        {
+            string ret=myadd(s1,s2);
+            for(auto c:ret)std::cout<<c;
+        }
+        if(op==2)
+        {
+            string ret=mysub(s1,s2);
+            for(auto c:ret)std::cout<<c;
+        }
+        if(op==3)
+        {
+            string ret=mymul(s1,s2);
+            for(auto c:ret)std::cout<<c;
+        }
+        if(op==4)
+        {
+            string ret=mydiv(s1,s2);
+            for(auto c:ret)std::cout<<c;
+        }
+        return;
     }
-    std::cout<<"\n";
 }
 int main()
 {
