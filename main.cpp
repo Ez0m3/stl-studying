@@ -1,10 +1,9 @@
 #include <iostream>
 #include <string>
-#include<cmath>
 using std::string;
 void reverse(string& s)
 {
-    int size=s.size();
+    size_t size=s.size();
     for(size_t i=0;i<size/2;i++)
     {
         char temp=s[i];
@@ -73,6 +72,7 @@ string mysub(const string& a,const string& b)
         }
         diff.push_back(borrow+'0');
     }
+    while(diff.back()=='0'&&diff.size()>1)diff.pop_back();
     if(!compare(a,b))
     {
 
