@@ -26,6 +26,7 @@ bool compare(const string& s1,const string& s2)
 }
 void removeleadingzeros(string& s)
 {
+    if(s.empty())return;
     size_t pos=0;
     while(pos<s.size()-1&&s[pos]=='0')++pos;
     if(pos>0)s.erase(0,pos);
@@ -35,6 +36,7 @@ string myadd(const string& a,const string& b)
     int i=a.size()-1;
     int j=b.size()-1;
     string sum;
+    sum.reserve(a.size()>b.size()?(a.size()+1):(b.size()+1));
     int carry=0;
     while(i>=0||j>=0||carry>0)
     {
@@ -59,6 +61,7 @@ string mysub(const string& a,const string& b)
     int i=s1.size()-1;
     int j=s2.size()-1;
     string diff;
+    diff.reserve(s1.size());
     int flag=0;
     while(i>=0||j>=0)
     {
@@ -92,9 +95,10 @@ string mymul(const string& a,const string& b)
 {
     if(a=="0"||b=="0")return "0";
     string mul;
+    mul.reserve(a.size()+b.size());
     int n=a.size()-1;
     int m=b.size()-1;
-    int* temp=new int[n+m+2]();
+    int* temp=new int[a.size()+b.size()]();
     for(int i=n;i>=0;i--)
     {
         for(int j=m;j>=0;j--)
@@ -105,18 +109,42 @@ string mymul(const string& a,const string& b)
             temp[i+j]+=sum/10;
         }
     }
-    for(int i=0;i<=n+m+1;i++)
-    {
-        mul.push_back(temp[n+m+1-i]+'0');
-    }
-    while(mul.back()=='0'&&mul.size()>1)mul.pop_back();
+    int k=0;
+    while(k<n+m+1&&temp[k]==0)++k;
+    for(;k<=n+m+1;++k)mul.push_back(char(temp[k]+'0'));
     delete[] temp;
-    reverse(mul);
     return mul;
 }
 string mydiv(const string& a,const string& b)
-{return a;}
-void print()
+{
+    //前提：b非高精度
+    string ret;
+    ret.reserve(a.size());
+    if(b=="0")
+    {
+        std::cout<<"除数不能为0！"<<"\n";
+        return string();
+    }
+    if(a=="0")return "0";
+
+    long long div{0};
+    long long ten{1};
+    for(int i=b.size()-1;i>=0;--i)
+    {
+        div+=ten*(b[i]-'0');
+        ten*=10;
+    }
+    long long temp{0};
+    for(size_t i=0;i<a.size();i++)
+    {
+        temp+=(a[i]-'0');
+        ret.push_back((temp/div)+'0');
+        temp=10*(temp%div);
+    }
+    removeleadingzeros(ret);
+    return ret;
+}
+void print() 
 {
     std::cout<<"输入：1.加法2.减法3.乘法4.除法0.退出"<<"\n";
 }
@@ -152,22 +180,22 @@ void menu()
         if(op==1)
         {
             string ret=myadd(s1,s2);
-            for(auto c:ret)std::cout<<c;
+            std::cout << ret << '\n';
         }
         if(op==2)
         {
             string ret=mysub(s1,s2);
-            for(auto c:ret)std::cout<<c;
+            std::cout << ret << '\n';
         }
         if(op==3)
         {
             string ret=mymul(s1,s2);
-            for(auto c:ret)std::cout<<c;
+            std::cout << ret << '\n';
         }
         if(op==4)
         {
             string ret=mydiv(s1,s2);
-            for(auto c:ret)std::cout<<c;
+            std::cout << ret << '\n';
         }
         return;
     }
