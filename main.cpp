@@ -24,6 +24,12 @@ bool compare(const string& s1,const string& s2)
     }
     return true;
 }
+void removeleadingzeros(string& s)
+{
+    size_t pos=0;
+    while(pos<s.size()-1&&s[pos]=='0')++pos;
+    if(pos>0)s.erase(0,pos);
+}
 string myadd(const string& a,const string& b)
 {
     int i=a.size()-1;
@@ -121,6 +127,8 @@ void menu()
     std::cin>>s1;
     std::cout<<"请输入高精度整数"<<"\n";
     std::cin>>s2;
+    removeleadingzeros(s1);
+    removeleadingzeros(s2);
     print();
     while(true)
     {
