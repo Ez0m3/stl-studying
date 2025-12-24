@@ -3,10 +3,11 @@
 template<typename T,std::size_t N>
 void bubble_sort(T (&arr)[N])
 {
-    for(std::size_t i=0;i<N-1;++i)
+    int size=static_cast<int>(N);
+    for(int i=0;i<size-1;++i)
     {
         bool isswap=false;
-        for(std::size_t j=0;j<N-i-1;++j)
+        for(int j=0;j<size-i-1;++j)
         {
             if(arr[j]>arr[j+1])
             {
@@ -20,10 +21,11 @@ void bubble_sort(T (&arr)[N])
 template<typename T,std::size_t N>
 void selection_sort(T (&arr)[N])
 {
-    for(std::size_t i=0;i<N-1;++i)
+    int size=static_cast<int>(N);
+    for(int i=0;i<size-1;++i)
     {
-        std::size_t minindex=i;
-        for(std::size_t j=i+1;j<N;++j)
+        int minindex=i;
+        for(int j=i+1;j<size;++j)
         {
             if(arr[j]<arr[minindex])
             minindex=j;
