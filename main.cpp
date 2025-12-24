@@ -1,7 +1,7 @@
 #include<iostream>
 #include<algorithm>
-template<typename t,std::size_t N>
-void bobblesort(t (&arr)[N])
+template<typename T,std::size_t N>
+void bubble_sort(T (&arr)[N])
 {
     for(std::size_t i=0;i<N-1;++i)
     {
@@ -17,10 +17,27 @@ void bobblesort(t (&arr)[N])
         if(!isswap)return;
     }
 }
+template<typename T,std::size_t N>
+void selection_sort(T (&arr)[N])
+{
+    for(std::size_t i=0;i<N-1;++i)
+    {
+        std::size_t minindex=i;
+        for(std::size_t j=i+1;j<N;++j)
+        {
+            if(arr[j]<arr[minindex])
+            minindex=j;
+        }
+        if(minindex!=i)
+        {
+            std::swap(arr[minindex],arr[i]);
+        }
+    }
+}
 int main()
 {
     int arr[]{3,5,1,65,87,2,534};
-    bobblesort(arr);
+    selection_sort(arr);
     for(auto x:arr)
     {
         std::cout<<x<<" ";
