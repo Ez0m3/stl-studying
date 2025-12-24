@@ -49,13 +49,35 @@ void insertion_sort(T (&arr)[N])
             arr[j+1]=std::move(arr[j]);
             --j;
         }
-        arr[j+1]=temp;
+        arr[j+1]=std::move(temp);
+    }
+}
+template<typename T,std::size_t N>
+void shell_sort(T (&arr)[N])
+{
+    const int n=static_cast<int>(N);
+    for(int gap=n/2;gap>0;gap/=2)
+    {
+        for(int i=0;i<gap;i++)         //相同gap组距的不同组循环
+        {
+            for(int j=i+gap;j<n;j+=gap)   //同一个组的组内循环,起始arr[i]，每一次循环后有序区整体增加一个arr[j+gap]
+            {
+                T temp=std::move(arr[j]);
+                int k=j-gap;
+                while(k>=i&&arr[k]>temp)   //arr[j]前面都是有序的
+                {
+                    arr[k+gap]=std::move(arr[k]);
+                    k-=gap;
+                }
+                arr[k+gap]=std::move(temp);
+            }
+        }
     }
 }
 int main()
 {
     int arr[]{142,7,23,99,3,5,1,65,0,7,2,534,11};
-    insertion_sort(arr);
+    shell_sort(arr);
     for(auto x:arr)
     {
         std::cout<<x<<" ";
