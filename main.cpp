@@ -1,5 +1,6 @@
 #include<iostream>
 #include<algorithm>
+#include<vector>
 template<typename T,std::size_t N>
 void bubble_sort(T (&arr)[N])
 {
@@ -100,10 +101,44 @@ void counting_sort(T (&arr)[N])
         }
     }
 }
+template<typename T,std::size_t N>
+void bucket_sort(T (&arr)[N])
+{
+    const int n=static_cast<int>(N);  
+    if(n<=1)return;
+    T min{arr[0]};
+    T max{arr[0]};
+    for(int i=1;i<n;++i)
+    {
+        if(arr[i]>max)max=arr[i];
+        if(arr[i]<min)min=arr[i];
+    }
+    int bucketnum=n;                                //可以在这修改桶数量,为了方便设置数量为n
+    int range=max-min;
+    if(range==0)return;
+    std::vector<std::vector<T>>bucket(n);          
+    for(int i=0;i<n;++i)
+    {
+        int index=(arr[i]-min)*(bucketnum-1)/range;   //为什么这里num要减一:因为索引是从0开始的：如果有 n 个桶，索引范围是 [0, n-1] 公式保证：最小值 → 索引 0 最大值 → 索引 n-1
+        bucket[index].push_back(arr[i]);
+    }
+    for(int i=0;i<bucketnum;++i)
+    {
+        std::sort(bucket[i].begin(),bucket[i].end());
+    }
+    int arrindex=0;
+    for(int i=0;i<bucketnum;++i)
+    {
+        for(int j=0;j<static_cast<int>(bucket[i].size());++j)
+        {
+            arr[arrindex++]=bucket[i][j];
+        }
+    }
+}
 int main()
 {
     int arr[]{142,7,23,99,3,5,1,65,0,7,2,534,11};
-    counting_sort(arr);
+    bucket_sort(arr);
     for(auto x:arr)
     {
         std::cout<<x<<" ";
