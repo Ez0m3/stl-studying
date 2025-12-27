@@ -1,0 +1,303 @@
+std::cout << "=== 测试1：基本功能测试 ===\n";
+    
+    LinkedList<int> list;
+    
+    // 1. 测试空链表
+    std::cout << "1. 空链表测试:\n";
+    std::cout << "   size = " << list.get_size() << " (应为0)\n";
+    std::cout << "   isempty = " << list.isempty() << " (应为1/true)\n";
+    assert(list.get_size() == 0);
+    assert(list.isempty());
+    
+    // 2. 测试push_front
+    std::cout << "\n2. push_front测试:\n";
+    list.push_front(10);
+    list.push_front(20);
+    list.push_front(30);
+    std::cout << "   添加30,20,10后: ";
+    list.print();  // 应为: 30 20 10
+    assert(list.get_size() == 3);
+    assert(list.front() == 30);
+    assert(list.back() == 10);
+    
+    // 3. 测试push_back
+    std::cout << "\n3. push_back测试:\n";
+    list.push_back(40);
+    list.push_back(50);
+    std::cout << "   再添加40,50后: ";
+    list.print();  // 应为: 30 20 10 40 50
+    assert(list.get_size() == 5);
+    assert(list.back() == 50);
+    
+    // 4. 测试pop_front
+    std::cout << "\n4. pop_front测试:\n";
+    int val1 = list.pop_front();
+    std::cout << "   弹出: " << val1 << " (应为30)\n";
+    std::cout << "   当前: ";
+    list.print();  // 应为: 20 10 40 50
+    assert(val1 == 30);
+    assert(list.get_size() == 4);
+    assert(list.front() == 20);
+    
+    // 5. 测试pop_back
+    std::cout << "\n5. pop_back测试:\n";
+    int val2 = list.pop_back();
+    std::cout << "   弹出: " << val2 << " (应为50)\n";
+    std::cout << "   当前: ";
+    list.print();  // 应为: 20 10 40
+    assert(val2 == 50);
+    assert(list.get_size() == 3);
+    assert(list.back() == 40);
+    
+    // 6. 测试find_index
+    std::cout << "\n6. find_index测试:\n";
+    size_t idx1 = list.find_index(10);
+    size_t idx2 = list.find_index(20);
+    size_t idx3 = list.find_index(999);  // 不存在
+    std::cout << "   10的位置: " << idx1 << " (应为1)\n";
+    std::cout << "   20的位置: " << idx2 << " (应为0)\n";
+    std::cout << "   999的位置: " << idx3 << " (应为88888888)\n";
+    assert(idx1 == 1);
+    assert(idx2 == 0);
+    assert(idx3 == 88888888);
+    
+    // 7. 测试reverse
+    std::cout << "\n7. reverse测试:\n";
+    std::cout << "   反转前: ";
+    list.print();  // 20 10 40
+    list.reverse();
+    std::cout << "   反转后: ";
+    list.print();  // 应为: 40 10 20
+    assert(list.front() == 40);
+    assert(list.back() == 20);
+    
+    // 8. 测试拷贝构造
+    std::cout << "\n8. 拷贝构造测试:\n";
+    LinkedList<int> list2 = list;  // 拷贝构造
+    std::cout << "   原链表: ";
+    list.print();   // 40 10 20
+    std::cout << "   拷贝后: ";
+    list2.print();  // 应为: 40 10 20
+    assert(list2.get_size() == 3);
+    assert(list2.front() == 40);
+    assert(list2.back() == 20);
+    
+    // 9. 测试拷贝赋值
+    std::cout << "\n9. 拷贝赋值测试:\n";
+    LinkedList<int> list3;
+    list3 = list;  // 拷贝赋值
+    std::cout << "   赋值后: ";
+    list3.print();  // 应为: 40 10 20
+    assert(list3.get_size() == 3);
+    
+    // 10. 测试移动构造
+    std::cout << "\n10. 移动构造测试:\n";
+    LinkedList<int> list4 = std::move(list3);
+    std::cout << "   移动后新链表: ";
+    list4.print();  // 应为: 40 10 20
+    std::cout << "   移动后原链表大小: " << list3.get_size() << " (应为0)\n";
+    assert(list4.get_size() == 3);
+    assert(list3.isempty());
+    
+    // 11. 测试移动赋值
+    std::cout << "\n11. 移动赋值测试:\n";
+    LinkedList<int> list5;
+    list5 = std::move(list4);
+    std::cout << "   移动赋值后: ";
+    list5.print();  // 应为: 40 10 20
+    std::cout << "   移动后原链表大小: " << list4.get_size() << " (应为0)\n";
+    assert(list5.get_size() == 3);
+    assert(list4.isempty());
+    
+    // 12. 测试clear
+    std::cout << "\n12. clear测试:\n";
+    list5.clear();
+    std::cout << "   清空后大小: " << list5.get_size() << " (应为0)\n";
+    assert(list5.isempty());
+    
+    std::cout << "\n✅ 所有测试通过！\n";
+
+    std::cout << "=== 边界情况测试 ===\n\n";
+    
+    LinkedList<int> list;
+    
+    // 测试1：完全空链表的所有操作
+    std::cout << "测试1: 空链表操作\n";
+    std::cout << "-----------------\n";
+    
+    // 1.1 front() 应该抛异常
+    std::cout << "1.1 测试 front() 在空链表:\n";
+    try {
+        int val = list.front();
+        std::cout << "   ❌ 错误：应该抛异常，但得到值: " << val << "\n";
+    } catch (const std::out_of_range& e) {
+        std::cout << "   ✅ 正确抛出异常: " << e.what() << "\n";
+    }
+    
+    // 1.2 back() 应该抛异常
+    std::cout << "\n1.2 测试 back() 在空链表:\n";
+    try {
+        int val = list.back();
+        std::cout << "   ❌ 错误：应该抛异常，但得到值: " << val << "\n";
+    } catch (const std::out_of_range& e) {
+        std::cout << "   ✅ 正确抛出异常: " << e.what() << "\n";
+    }
+    
+    // 1.3 pop_front() 应该抛异常
+    std::cout << "\n1.3 测试 pop_front() 在空链表:\n";
+    try {
+        int val = list.pop_front();
+        std::cout << "   ❌ 错误：应该抛异常，但得到值: " << val << "\n";
+    } catch (const std::out_of_range& e) {
+        std::cout << "   ✅ 正确抛出异常: " << e.what() << "\n";
+    }
+    
+    // 1.4 pop_back() 应该抛异常
+    std::cout << "\n1.4 测试 pop_back() 在空链表:\n";
+    try {
+        int val = list.pop_back();
+        std::cout << "   ❌ 错误：应该抛异常，但得到值: " << val << "\n";
+    } catch (const std::out_of_range& e) {
+        std::cout << "   ✅ 正确抛出异常: " << e.what() << "\n";
+    }
+    
+    // 测试2：只有一个元素的链表
+    std::cout << "\n\n测试2: 单元素链表\n";
+    std::cout << "-----------------\n";
+    
+    list.push_back(42);  // 现在链表: [42]
+    
+    // 2.1 front() 和 back() 应该相同
+    std::cout << "2.1 测试单元素链表的 front() 和 back():\n";
+    std::cout << "   front() = " << list.front() << "\n";
+    std::cout << "   back() = " << list.back() << "\n";
+    if (list.front() == list.back()) {
+        std::cout << "   ✅ front() 和 back() 相同\n";
+    } else {
+        std::cout << "   ❌ 错误：front() 和 back() 应该相同\n";
+    }
+    
+    // 2.2 pop_front() 后链表变空
+    std::cout << "\n2.2 测试 pop_front() 后:\n";
+    int val = list.pop_front();
+    std::cout << "   弹出值: " << val << " (应为42)\n";
+    std::cout << "   弹出后 size: " << list.get_size() << " (应为0)\n";
+    std::cout << "   弹出后 isempty: " << list.isempty() << " (应为1)\n";
+    
+    // 2.3 再次测试空链表（确保pop_front后真的空了）
+    std::cout << "\n2.3 测试 pop_front() 后再次操作:\n";
+    try {
+        list.front();
+        std::cout << "   ❌ 错误：应该抛异常但没抛\n";
+    } catch (const std::out_of_range& e) {
+        std::cout << "   ✅ 正确抛出异常\n";
+    }
+    
+    // 测试3：两个元素的链表
+    std::cout << "\n\n测试3: 双元素链表\n";
+    std::cout << "-----------------\n";
+    
+    list.push_back(100);
+    list.push_back(200);  // 链表: [100, 200]
+    
+    std::cout << "3.1 测试双元素链表:\n";
+    std::cout << "   front() = " << list.front() << " (应为100)\n";
+    std::cout << "   back() = " << list.back() << " (应为200)\n";
+    std::cout << "   size = " << list.get_size() << " (应为2)\n";
+    
+    // 3.2 pop_back() 测试
+    std::cout << "\n3.2 测试 pop_back():\n";
+    int back_val = list.pop_back();
+    std::cout << "   弹出值: " << back_val << " (应为200)\n";
+    std::cout << "   弹出后 size: " << list.get_size() << " (应为1)\n";
+    std::cout << "   弹出后 front = back = " << list.front() << " (应为100)\n";
+    
+    // 测试4：大量操作后的边界
+    std::cout << "\n\n测试4: 大量操作边界\n";
+    std::cout << "-------------------\n";
+    
+    list.clear();
+    
+    // 4.1 连续push/pop
+    std::cout << "4.1 连续push/pop测试:\n";
+    for (int i = 0; i < 10; ++i) {
+        list.push_front(i);
+    }
+    std::cout << "   添加10个元素后 size: " << list.get_size() << "\n";
+    
+    // 连续pop直到空
+    int pop_count = 0;
+    while (!list.isempty()) {
+        list.pop_front();
+        pop_count++;
+    }
+    std::cout << "   弹出 " << pop_count << " 个元素后 size: " << list.get_size() << "\n";
+    
+    // 4.2 再次测试空链表操作
+    std::cout << "\n4.2 清空后测试:\n";
+    try {
+        list.pop_back();
+        std::cout << "   ❌ 错误：应该抛异常但没抛\n";
+    } catch (const std::out_of_range& e) {
+        std::cout << "   ✅ 正确抛出异常\n";
+    }
+    
+    // 测试5：拷贝和移动的边界
+    std::cout << "\n\n测试5: 拷贝移动边界\n";
+    std::cout << "-------------------\n";
+    
+    LinkedList<int> source;
+    source.push_back(1);
+    source.push_back(2);
+    
+    // 5.1 拷贝空链表
+    std::cout << "5.1 拷贝非空链表:\n";
+    LinkedList<int> copy = source;  // 拷贝构造
+    std::cout << "   源链表 size: " << source.get_size() << "\n";
+    std::cout << "   拷贝链表 size: " << copy.get_size() << "\n";
+    
+    // 5.2 清空源链表，测试拷贝是否独立
+    std::cout << "\n5.2 测试拷贝独立性:\n";
+    source.clear();
+    std::cout << "   清空源链表后:\n";
+    std::cout << "     源链表 size: " << source.get_size() << " (应为0)\n";
+    std::cout << "     拷贝链表 size: " << copy.get_size() << " (应为2)\n";
+    
+    if (copy.get_size() == 2) {
+        std::cout << "   ✅ 拷贝是独立的\n";
+    } else {
+        std::cout << "   ❌ 错误：拷贝不独立\n";
+    }
+    
+    // 测试6：reverse边界
+    std::cout << "\n\n测试6: reverse边界\n";
+    std::cout << "-------------------\n";
+    
+    LinkedList<int> rev_list;
+    
+    // 6.1 空链表reverse
+    std::cout << "6.1 空链表reverse:\n";
+    rev_list.reverse();  // 应该什么都不做，不崩溃
+    std::cout << "   ✅ 空链表reverse成功\n";
+    
+    // 6.2 单元素链表reverse
+    std::cout << "\n6.2 单元素链表reverse:\n";
+    rev_list.push_back(999);
+    rev_list.reverse();
+    std::cout << "   反转后 front: " << rev_list.front() << " (应为999)\n";
+    std::cout << "   反转后 back: " << rev_list.back() << " (应为999)\n";
+    
+    // 6.3 双元素链表reverse
+    std::cout << "\n6.3 双元素链表reverse:\n";
+    rev_list.clear();
+    rev_list.push_back(1);
+    rev_list.push_back(2);
+    std::cout << "   反转前: ";
+    rev_list.print();
+    rev_list.reverse();
+    std::cout << "   反转后: ";
+    rev_list.print();
+    std::cout << "   反转后 front: " << rev_list.front() << " (应为2)\n";
+    std::cout << "   反转后 back: " << rev_list.back() << " (应为1)\n";
+    
+    std::cout << "\n🎉 所有边界测试完成！\n";
