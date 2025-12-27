@@ -1,245 +1,351 @@
-1.命名规范
+一、链表基础概念
+1.1 链表组成要素
+text
+- 节点(Node)：数据域(data) + 指针域(next)
+- 头指针(phead)：指向第一个节点
+- 尾指针(ptail)：指向最后一个节点（非必须，但提高效率）
+- 大小(size)：记录节点数量（非必须，但提高效率）
+1.2 链表类型
+单向链表：每个节点只有一个指向后继的指针
 
-// 腾讯/华为/阿里通用风格
-class DataProcessor;          // 类名：大驼峰
-int m_bufferSize;            // 成员变量：m_前缀+小驼峰
-static int s_instanceCount;  // 静态成员：s_前缀
-void processData();          // 函数名：小驼峰
-const int MAX_SIZE = 1024;   // 常量：全大写+下划线
-int* pBuffer;                // 指针：p前缀（传统风格）
+双向链表：节点有前驱和后继两个指针
 
-2. 头文件规范
+循环链表：尾节点指向头节点
 
-// 字节跳动/腾讯风格
-#pragma once                  // 首选#pragma once
-#ifndef _HEADER_NAME_H_      // 或传统宏保护
-#define _HEADER_NAME_H_
-
-#include <vector>
-#include <string>
-// 顺序：系统头文件 -> 第三方库 -> 项目头文件
-
-namespace company {
-namespace module {
-
-class ClassName {
-    // 声明顺序：public -> protected -> private
-};
-
-} // namespace module
-} // namespace company
-
-#endif // _HEADER_NAME_H_
-
-3. 类设计规范
-
-// 百度/阿里风格
-class NetworkManager final {  // 明确final防止继承
-public:                       // 访问限定符单独一行
-    using Ptr = std::shared_ptr<NetworkManager>;
-    
-    // 构造/析构放最前面
-    explicit NetworkManager(Config config);  // 单参构造必须explicit
-    ~NetworkManager() = default;
-    
-    // 删除不需要的函数
-    NetworkManager(const NetworkManager&) = delete;
-    NetworkManager& operator=(const NetworkManager&) = delete;
-    
-    // 成员函数按功能分组
-    // 1. 生命周期管理
-    bool initialize();
-    void cleanup();
-    
-    // 2. 业务接口
-    Result process(Request& request);
-    
-private:
-    // 成员变量按相关性分组
-    Config m_config;
-    std::vector<Connection> m_connections;
-    
-    // 内部工具函数
-    bool validateRequest(const Request& req);
-};
-
-1. 智能指针使用规范（腾讯/网易）
-
-// 优先使用unique_ptr，明确所有权
-std::unique_ptr<Resource> resource = std::make_unique<Resource>();
-
-// 需要共享所有权时才用shared_ptr
-class Manager {
-private:
-    std::shared_ptr<Cache> m_cache;  // 多个对象共享缓存
-    
-public:
-    std::unique_ptr<Task> createTask() {  // 工厂函数返回unique_ptr
-        return std::make_unique<Task>();
-    }
-};
-
-// 禁止：裸指针作为类成员（除非极特殊情况）
-// 可以：函数参数使用裸指针表示可选/不取得所有权
-void processData(const Data* optionalData = nullptr);
-
-2. 容器选择规范（字节/阿里）
-
-// 默认选择
-std::vector<T>              // 90%场景的首选
-std::unordered_map<K, V>    // 需要快速查找时
-std::array<T, N>            // 编译期已知大小
-
-// 特殊场景
-std::deque<T>               // 频繁头尾操作
-std::list<T>                // 极少使用，需要证明必要性
-std::map<K, V>              // 需要有序遍历时
-
-1. 字符串处理（腾讯游戏）
-
-// 禁止在循环中拼接字符串
-std::string result;
-result.reserve(estimated_size);  // 预分配内存
-for (const auto& item : items) {
-    result.append(item);
-}
-
-// 使用string_view避免拷贝
-void processString(std::string_view str);  // 接受任意字符串类型
-
-// 小字符串直接使用char数组
-char buffer[64];
-snprintf(buffer, sizeof(buffer), "%s_%d", prefix, id);
-
-2. 移动语义规范（华为）
-
-class DataHolder {
-private:
-    std::vector<int> m_data;
-    
-public:
-    // 提供移动构造和移动赋值
-    DataHolder(DataHolder&& other) noexcept
-        : m_data(std::move(other.m_data)) {}
-    
-    DataHolder& operator=(DataHolder&& other) noexcept {
-        if (this != &other) {
-            m_data = std::move(other.m_data);
-        }
-        return *this;
-    }
-    
-    // 接口支持移动
-    void setData(std::vector<int> data) {  // 按值传递+移动
-        m_data = std::move(data);
-    }
-};
-
-3. 内联与热路径优化（阿里高并发）
-
-// 高频调用的小函数标记为inline
-inline bool isValid(int value) {
-    return value >= 0 && value < MAX_LIMIT;
-}
-
-// 热路径避免虚函数调用
-class Processor {
-public:
-    virtual void process() = 0;
-    
-    // 提供非虚接口供热路径调用
-    void fastProcess() {  // 内联、非虚
-        // ... 快速处理逻辑
-        processImpl();
-    }
-    
-private:
-    virtual void processImpl() = 0;  // 虚函数放private
-};
-
-🔒 并发安全规范
-
-class ThreadSafeQueue {
-private:
-    mutable std::mutex m_mutex;  // mutable允许const方法加锁
-    std::queue<Task> m_queue;
-    std::condition_variable m_cv;
-    
-public:
-    void push(Task task) {
-        {
-            std::lock_guard<std::mutex> lock(m_mutex);  // 最小作用域
-            m_queue.push(std::move(task));
-        }  // lock自动释放
-        m_cv.notify_one();  // 通知在锁外进行
-    }
-    
-    bool tryPop(Task& task) {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_queue.empty()) {
-            return false;
-        }
-        task = std::move(m_queue.front());
-        m_queue.pop();
-        return true;
-    }
-};
-
-1. 目录结构（腾讯/百度）
-
-project/
-├── include/                 # 公开头文件
-│   └── module/
-│       └── public_api.h
-├── src/                    # 实现文件
-│   ├── module/
-│   │   ├── internal_impl.cpp
-│   │   └── internal_impl.h  # 私有头文件放src
-│   └── main.cpp
-├── tests/                  # 单元测试
-│   └── module_test.cpp
-├── third_party/           # 第三方库
-├── build/                 # 构建输出
-├── CMakeLists.txt         # 现代CMake
-└── README.md
-
-📈 代码审查重点
-1. 必须审查项
-内存泄漏可能（智能指针使用正确性）
-
-线程安全（竞态条件、死锁风险）
-
-异常安全（资源泄漏风险）
-
-性能热点（循环中的重复计算、不必要的拷贝）
-
-缓冲区溢出风险
-
-2. 常见不良模式（各厂通用）
+二、内存管理要点
+2.1 new/delete配对
 cpp
-// 不良模式1：虚函数过度使用
-class Processor {
-public:
-    virtual ~Processor() = default;
-    virtual void step1();
-    virtual void step2();  // 太多虚函数影响性能
-    virtual void step3();
-};
+// 正确示例
+Node* newNode = new Node(value);  // 分配
+delete node;                      // 释放
 
-// 不良模式2：过度封装
-class OverEncapsulated {
-private:
-    int m_value;
-    
-public:
-    void setValue(int v) { m_value = v; }  // 简单的setter/getter
-    int getValue() const { return m_value; }  // 直接public成员可能更好
-};
-
-// 不良模式3：异常滥用
-bool loadConfig() {
-    if (!file.exists()) {
-        throw FileException("not found");  // 非异常情况使用异常
-    }
-    return true;
+// 易错点：忘记释放内存导致内存泄漏
+void wrongExample() {
+    Node* p = new Node(1);
+    // 没有 delete p; ← 内存泄漏！
 }
+2.2 深拷贝 vs 浅拷贝
+cpp
+// 浅拷贝（错误）：只复制指针，不复制数据
+LinkedList(const LinkedList& other) {
+    phead = other.phead;  // 错误！两个链表共享同一内存
+}
+
+// 深拷贝（正确）：复制所有节点
+LinkedList(const LinkedList& other) {
+    Node* current = other.phead;
+    while(current) {
+        push_back(current->data);  // 创建新节点
+        current = current->next;
+    }
+}
+三、五大特殊成员函数（Rule of Five）
+3.1 拷贝构造函数
+cpp
+// 要点：必须深拷贝所有节点
+LinkedList(const LinkedList& other) : phead(nullptr), ptail(nullptr), size(0) {
+    Node* current = other.phead;
+    while(current) {
+        push_back(current->data);
+        current = current->next;
+    }
+}
+3.2 拷贝赋值运算符
+cpp
+// 要点：处理自赋值、先清理再复制
+LinkedList& operator=(const LinkedList& other) {
+    if(this != &other) {          // 1. 检查自赋值
+        clear();                  // 2. 清理现有资源
+        Node* current = other.phead;
+        while(current) {          // 3. 深拷贝
+            push_back(current->data);
+            current = current->next;
+        }
+    }
+    return *this;
+}
+3.3 移动构造函数
+cpp
+// 要点：转移资源所有权，置空原对象
+LinkedList(LinkedList&& other) noexcept
+    : phead(other.phead), ptail(other.ptail), size(other.size) {
+    other.phead = nullptr;
+    other.ptail = nullptr;
+    other.size = 0;
+}
+3.4 移动赋值运算符
+cpp
+// 要点：清理当前资源 + 转移所有权
+LinkedList& operator=(LinkedList&& other) noexcept {
+    if(this != &other) {
+        clear();                    // 清理当前资源
+        phead = other.phead;        // 转移所有权
+        ptail = other.ptail;
+        size = other.size;
+        other.phead = nullptr;      // 置空原对象
+        other.ptail = nullptr;
+        other.size = 0;
+    }
+    return *this;
+}
+3.5 析构函数
+cpp
+// 要点：释放所有节点内存
+~LinkedList() {
+    clear();
+}
+
+void clear() {
+    Node* current = phead;
+    while(current) {
+        Node* next = current->next;  // 先保存下一个节点
+        delete current;              // 再删除当前节点
+        current = next;
+    }
+    phead = ptail = nullptr;
+    size = 0;
+}
+四、常用操作实现要点
+4.1 插入操作
+cpp
+// push_front：更新头指针
+void push_front(const T& value) {
+    phead = new Node(value, phead);  // 新节点指向原头节点
+    if(ptail == nullptr) ptail = phead;  // 空链表时更新尾指针
+    ++size;
+}
+
+// push_back：更新尾指针
+void push_back(const T& value) {
+    Node* newNode = new Node(value);
+    if(ptail == nullptr) {
+        phead = ptail = newNode;     // 空链表情况
+    } else {
+        ptail->next = newNode;       // 原尾节点指向新节点
+        ptail = newNode;             // 更新尾指针
+    }
+    ++size;
+}
+4.2 删除操作
+cpp
+// pop_front：删除头节点
+T pop_front() {
+    if(isempty()) throw std::out_of_range("empty");
+    Node* temp = phead;
+    T value = std::move(phead->data);  // 保存数据
+    phead = phead->next;               // 更新头指针
+    if(phead == nullptr) ptail = nullptr;  // 链表变空
+    delete temp;
+    --size;
+    return value;
+}
+
+// pop_back：删除尾节点（效率低，O(n)）
+T pop_back() {
+    if(isempty()) throw std::out_of_range("empty");
+    if(phead == ptail) {               // 只有一个节点
+        T value = std::move(phead->data);
+        delete phead;
+        phead = ptail = nullptr;
+        --size;
+        return value;
+    }
+    // 找到倒数第二个节点
+    Node* current = phead;
+    while(current->next != ptail) {
+        current = current->next;
+    }
+    T value = std::move(ptail->data);
+    delete ptail;
+    ptail = current;                   // 更新尾指针
+    ptail->next = nullptr;             // 重要！断开连接
+    --size;
+    return value;
+}
+4.3 反转链表
+cpp
+void reverse() {
+    if(phead == nullptr || phead == ptail) return;
+    
+    Node* prev = nullptr;
+    Node* current = phead;
+    Node* next = nullptr;
+    
+    ptail = phead;  // 头尾交换
+    
+    while(current) {
+        next = current->next;  // 保存下一个节点
+        current->next = prev;  // 反转指针
+        prev = current;        // 前移prev
+        current = next;        // 前移current
+    }
+    
+    phead = prev;  // 更新头指针
+}
+五、常见易错点
+5.1 空指针检查
+cpp
+// 错误：缺少空指针检查
+T& front() {
+    return phead->data;  // 如果phead为nullptr，崩溃！
+}
+
+// 正确：添加空指针检查
+T& front() {
+    if(isempty()) throw std::out_of_range("empty");
+    return phead->data;
+}
+5.2 边界条件处理
+cpp
+// 易错：处理单节点链表时忘记更新尾指针
+void pop_front() {
+    delete phead;
+    phead = phead->next;  // 错误！phead已经被删除
+}
+
+// 正确：
+void pop_front() {
+    Node* temp = phead;
+    phead = phead->next;    // 先更新指针
+    delete temp;            // 再删除
+    if(phead == nullptr) ptail = nullptr;  // 重要！
+}
+5.3 内存泄漏
+cpp
+// 易错：忘记在clear()中重置size
+void clear() {
+    while(phead) {
+        Node* temp = phead;
+        phead = phead->next;
+        delete temp;
+    }
+    // 忘记：ptail = nullptr;
+    // 忘记：size = 0;
+}
+
+// 正确：
+void clear() {
+    while(phead) {
+        Node* temp = phead;
+        phead = phead->next;
+        delete temp;
+    }
+    ptail = nullptr;  // 必须重置！
+    size = 0;         // 必须重置！
+}
+5.4 自赋值问题
+cpp
+// 易错：忽略自赋值检查
+LinkedList& operator=(const LinkedList& other) {
+    clear();                    // 如果是自赋值，这里会清空自己！
+    // ... 复制other（但other已经被清空了）
+}
+
+// 正确：
+LinkedList& operator=(const LinkedList& other) {
+    if(this == &other) return *this;  // 自赋值检查
+    clear();
+    // ... 复制操作
+}
+六、模板编程注意事项
+6.1 模板类成员函数定义
+cpp
+// 需要在函数前加 template<typename T>
+template<typename T>
+void LinkedList<T>::push_front(const T& value) {
+    // 实现
+}
+6.2 完美转发
+cpp
+// 同时支持左值和右值
+void push_front(const T& value);   // 左值版本
+void push_front(T&& value);        // 右值版本
+
+// 使用std::move移动右值
+Node* newNode = new Node(std::move(value));
+七、调试技巧
+7.1 可视化链表
+cpp
+void visualize() const {
+    Node* current = phead;
+    std::cout << "HEAD -> ";
+    while(current) {
+        std::cout << "[" << current->data << "] -> ";
+        current = current->next;
+    }
+    std::cout << "NULL" << std::endl;
+    std::cout << "Size: " << size << std::endl;
+    if(ptail) std::cout << "Tail: " << ptail->data << std::endl;
+}
+7.2 边界条件测试
+cpp
+// 测试用例
+1. 空链表操作
+2. 单节点链表
+3. 双节点链表  
+4. 大量节点操作
+5. 反复插入删除
+八、性能考量
+8.1 时间复杂度
+text
+- push_front/pop_front: O(1)
+- push_back: O(1)（有尾指针）/ O(n)（无尾指针）
+- pop_back: O(n)
+- find_index: O(n)
+- reverse: O(n)
+8.2 内存占用
+每个节点额外开销：一个指针（8字节）
+
+总内存 ≈ n × (sizeof(T) + sizeof(Node*))
+
+九、最佳实践
+9.1 编码习惯
+先画图再写代码（特别是指针操作）
+
+每个函数都要考虑边界条件
+
+及时释放不需要的内存
+
+写一个函数测试一个函数
+
+使用智能指针避免内存泄漏（可选）
+
+9.2 测试策略
+cpp
+int main() {
+    LinkedList<int> list;
+    
+    // 测试1：空链表操作
+    assert(list.isempty());
+    
+    // 测试2：插入删除
+    list.push_back(1);
+    assert(list.front() == 1);
+    
+    // 测试3：拷贝语义
+    LinkedList<int> list2 = list;
+    assert(list2.front() == 1);
+    
+    // 测试4：移动语义
+    LinkedList<int> list3 = std::move(list);
+    assert(list3.front() == 1);
+    assert(list.isempty());  // list应该为空
+    
+    // 测试5：异常处理
+    try {
+        LinkedList<int> emptyList;
+        emptyList.pop_front();
+    } catch(const std::exception& e) {
+        std::cout << "Expected exception: " << e.what() << std::endl;
+    }
+}
+十、常见面试问题
+如何检测链表是否有环？
+
+如何找到链表的中间节点？
+
+如何合并两个有序链表？
+
+如何删除链表中的重复元素？
+
+如何实现双向链表？
