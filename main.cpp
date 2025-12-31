@@ -131,7 +131,7 @@ public:
         }
         std::swap(phead,ptail);
     }
-    bool hascircle(){
+    bool has_circle(){
         node* fast=phead->node_next;
         node* slow=phead->node_next;
         while(fast!=nullptr&&fast->node_next!=nullptr){
@@ -141,7 +141,30 @@ public:
         }
         return false;
     }
+    int get_cycle_entry(){
+        node* fast=phead->node_next;
+        node* slow=phead->node_next;
+        while(fast!=slow){
+            fast=fast->node_next->node_next;
+            slow=slow->node_next;
+        }
+        fast=phead->node_next;
+        while(fast!=slow){
+            fast=fast->node_next;
+            slow=slow->node_next;
+        }
+        return fast->data;
+    }
 };
+int josephus_problem(int n,int gap){
+    int result=0;
+    for(int i=1;i<n;++i){
+        result=(result+gap)%(i+1);
+    }
+    return result;
+}
 int main(){
-    
+    for(int i=1;i<=10;++i){
+        std::cout<<josephus_problem(i,2);
+    }
 }
