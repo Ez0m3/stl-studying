@@ -1,26 +1,26 @@
 #include<iostream>
-template<typename T,int MAXSIZE=100>
-class stack{
-private:
-    T arr[MAXSIZE];
-    int top;
-public:
-    stack()
-        :top(-1){}
-    void push(const T& value){
-        if(top>=MAXSIZE-1)throw std::out_of_range("stack flow");
-        arr[++top]=value;
-    }
-    void push(T&& value){
-        if(top>=MAXSIZE-1)throw std::out_of_range("stack flow");
-        arr[++top]=std::move(value);
-    }
-    T pop(){
-        if(top<0)throw std::out_of_range("stack empty");
-        return arr[top--];
-    }
-    T get_top()const{return arr[top];}
-};
+#include<memory>
+using std::unique_ptr;
+// template<typename T>
+// class deque{
+// private:
+//     struct node{
+//         T data;
+//         unique_ptr<node> pnext;
+//         node(T value=T(),unique_ptr<node> ptr)
+//             :data(value),pnext(ptr){}
+//     };
+// };
+template<typename T>
+struct node{
+        T data;
+        unique_ptr<node> pnext;
+        node(T value=T(),unique_ptr<node> ptr=nullptr)
+            :data(value),pnext(ptr){}
+    };
 int main(){
-
+    node<int> node1(3);
+    node<int> node2(4);
+    node1=std::move(node2);
+    std::cout<<node2.data<<"\n";
 }
