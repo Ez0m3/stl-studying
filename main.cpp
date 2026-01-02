@@ -10,8 +10,16 @@ private:
     size_t capacity;
     void resize(){
         size_t newcap=capacity>=100?capacity*3/2:capacity*2;   //扩容策略：小于100时*2，大于100*时1.5
-        std::unique_ptr<T[]> newarr(newcap);
-
+        auto newarr=std::make_unique<T[]>(newcap);
+        size_t curr=front;
+        for(size_t i=0;i<capacity;++i){       //数据迁移
+            newarr[i]=std::move(arr[curr]);
+            curr=(curr+1)%capacity;
+        }
+        arr=std::move(newarr);            //更新参数
+        front=0;
+        rear=capacity;
+        capacity=newcap;
     }
 public:
     queue(std::size_t cap=100)
@@ -22,11 +30,11 @@ public:
     size_t getnum()const{
         return (rear-front+capacity)%capacity;
     }
-    T getfront()const{
+    T& getfront()const{
         if(isempty())throw std::out_of_range("empty queue");
         return arr[front];
     }
-    T getrear()const{
+    T& getrear()const{
         if(isempty())throw std::out_of_range("empty queue");
         size_t prev=(rear-1+capacity)%capacity;
         return arr[prev];
@@ -53,7 +61,11 @@ public:
         rear=(rear+1)%capacity;
         if(front==rear)resize();
     }
+    void print()const{
+        for(size_t i=front;i!=rear;i=(i+1)%capacity){
+            std::cout<<*arr[i]<<"  ";
+        }
+    }
 };
 int main(){
-
 }
