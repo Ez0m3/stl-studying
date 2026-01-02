@@ -8,7 +8,11 @@ private:
     size_t front;    //前面出队，指向第一个元素，空为0
     size_t rear;     //后面入队,指向最后一个元素的下一位，空为0
     size_t capacity;
-    void resize();
+    void resize(){
+        size_t newcap=capacity>=100?capacity*3/2:capacity*2;   //扩容策略：小于100时*2，大于100*时1.5
+        std::unique_ptr<T[]> newarr(newcap);
+
+    }
 public:
     queue(std::size_t cap=100)
         :arr(std::make_unique<T[]>(cap)),front(0),rear(0),capacity(cap){}
@@ -50,6 +54,6 @@ public:
         if(front==rear)resize();
     }
 };
-size_t main(){
+int main(){
 
 }
