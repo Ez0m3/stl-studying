@@ -1,43 +1,55 @@
 #include<iostream>
 #include<memory>
-#include<string>
-#include<cassert>
-using std::unique_ptr;
+using std::size_t;
 template<typename T>
 class queue{
 private:
-    struct node{
-        T data;
-        unique_ptr<node> pnext;
-        node(T value=T(),unique_ptr<node> ptr=nullptr)
-            :data(value),pnext(std::move(ptr)){}
-    };
-    unique_ptr<node> phead;
-    node* ptail;
-    int size;
+    std::unique_ptr<T[]> arr;
+    size_t front;    //前面出队，指向第一个元素，空为0
+    size_t rear;     //后面入队,指向最后一个元素的下一位，空为0
+    size_t capacity;
+    void resize();
 public:
-    queue()
-        :phead(std::make_unique<node>()),ptail(phead.get()),size(0){}
-    bool isempty()const{return phead->pnext==nullptr;}
-    void push(T value){
-        ptail->pnext=std::make_unique<node>(value);
-        ptail=ptail->pnext.get();
-        ++size;
+    queue(std::size_t cap=100)
+        :arr(std::make_unique<T[]>(cap)),front(0),rear(0),capacity(cap){}
+    void clear(){
+        front=rear=0;
     }
-    T pop(){
-        if(isempty())throw std::out_of_range("empty queue");
-        T temp=std::move(phead->pnext->data);
-        phead->pnext=std::move(phead->pnext->pnext);
-        --size;
-        return temp;
+    size_t getnum()const{
+        return (rear-front+capacity)%capacity;
     }
     T getfront()const{
-        return phead->pnext->data;
+        if(isempty())throw std::out_of_range("empty queue");
+        return arr[front];
     }
-    T getend()const{
-        return ptail->data;
+    T getrear()const{
+        if(isempty())throw std::out_of_range("empty queue");
+        size_t prev=(rear-1+capacity)%capacity;
+        return arr[prev];
+    }
+    bool isempty()const{
+        return front==rear;
+    }
+    bool pop(){
+        if(isempty()){
+            std::cout<<"queue empty\n";
+            return false;
+        }
+        front=(front+1)%capacity;
+        if(front==rear)front=rear=0;
+        return true;
+    }
+    void push(const T& value){
+        arr[rear]=value;
+        rear=(rear+1)%capacity;
+        if(front==rear)resize();
+    }
+    void push(T&& value){
+        arr[rear]=std::move(value);
+        rear=(rear+1)%capacity;
+        if(front==rear)resize();
     }
 };
-int main() {
-  
+size_t main(){
+
 }
