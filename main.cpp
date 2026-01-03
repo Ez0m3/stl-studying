@@ -213,16 +213,21 @@ public:
         stack<const node*> s;
         const node* curr=root.get();
         s.push(curr);
+        bool backflag=false;
         while(!s.empty()){
-            curr=s.get_top();
+            curr=s.get_top();           //curr为const node*类型
+            if((!backflag)&&(curr->left)){
+                s.push(curr->left.get());
+                backflag=false;
+                continue;
+            }
+            std::cout<<curr->data<<"\n";
+            s.pop();
+            backflag=true;
             if(curr->right){
                 s.push(curr->right.get());
-            }else if(curr->left){
-                s.push(curr->left.get());
-            }else{
-                std::cout<<curr->data<<"\n";
-            }
-            s.pop();
+                backflag=false;
+            }         
         }
     }
 };
