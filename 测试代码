@@ -1,37 +1,367 @@
-void test_iterator() {
-    std::cout << "\n=== 测试迭代器操作 ===" << std::endl;
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cassert>
+#include <algorithm>
+
+// ============ 你的BST类定义在这里 ============
+
+void test_basic_operations() {
+    std::cout << "=== 基础操作测试 ===\n";
+    BST<int> tree;
     
-    list list9;
-    list9.push_back(1);
-    list9.push_back(11);
-    list9.push_back(21);
+    assert(tree.empty());
+    assert(tree.size() == 0);
+    assert(!tree.contains(5));
     
-    // 测试前置和后置++
-    std::cout << "使用迭代器遍历: ";
-    for (list::iterator it = list9.begin(); it != list9.end(); ++it) {
-        std::cout << *it << " ";
+    assert(tree.insert(5));
+    assert(!tree.empty());
+    assert(tree.size() == 1);
+    assert(tree.contains(5));
+    
+    assert(tree.insert(3));
+    assert(tree.insert(7));
+    assert(tree.size() == 3);
+    assert(tree.contains(3));
+    assert(tree.contains(7));
+    
+    assert(!tree.insert(5));
+    assert(!tree.insert(3));
+    assert(!tree.insert(7));
+    assert(tree.size() == 3);
+    
+    std::cout << "✓ 基础操作测试通过\n";
+}
+
+void test_remove_leaf() {
+    std::cout << "\n=== 测试删除叶子节点 ===\n";
+    BST<int> tree;
+    
+    tree.insert(5);
+    tree.insert(3);
+    tree.insert(7);
+    tree.insert(2);
+    tree.insert(4);
+    tree.insert(6);
+    tree.insert(8);
+    
+    assert(tree.size() == 7);
+    
+    // 删除叶子节点
+    assert(tree.remove(2));
+    assert(tree.size() == 6);
+    assert(!tree.contains(2));
+    assert(tree.contains(3));
+    assert(tree.contains(4));
+    assert(tree.contains(5));
+    
+    assert(tree.remove(8));
+    assert(tree.size() == 5);
+    assert(!tree.contains(8));
+    
+    std::cout << "✓ 删除叶子节点测试通过\n";
+}
+
+void test_remove_one_child() {
+    std::cout << "\n=== 测试删除只有一个子节点的节点 ===\n";
+    BST<int> tree;
+    
+    // 构建树:    5
+    //          /   \
+    //         3     8
+    //        /     /
+    //       1     6
+    //              \
+    //               7
+    tree.insert(5);
+    tree.insert(3);
+    tree.insert(8);
+    tree.insert(1);
+    tree.insert(6);
+    tree.insert(7);
+    
+    assert(tree.size() == 6);
+    
+    // 删除节点8（有一个左子节点6）
+    assert(tree.remove(8));
+    assert(tree.size() == 5);
+    assert(!tree.contains(8));
+    assert(tree.contains(6));
+    assert(tree.contains(7));
+    
+    // 删除节点3（有一个左子节点1）
+    assert(tree.remove(3));
+    assert(tree.size() == 4);
+    assert(!tree.contains(3));
+    assert(tree.contains(1));
+    
+    std::cout << "✓ 删除只有一个子节点的节点测试通过\n";
+}
+
+void test_remove_two_children() {
+    std::cout << "\n=== 测试删除有两个子节点的节点 ===\n";
+    BST<int> tree;
+    
+    // 标准BST删除案例
+    //       10
+    //      /  \
+    //     5    15
+    //    / \   / \
+    //   3   8 12  18
+    //  / \   \    /
+    // 1   4   9  17
+    tree.insert(10);
+    tree.insert(5);
+    tree.insert(15);
+    tree.insert(3);
+    tree.insert(8);
+    tree.insert(12);
+    tree.insert(18);
+    tree.insert(1);
+    tree.insert(4);
+    tree.insert(9);
+    tree.insert(17);
+    
+    assert(tree.size() == 11);
+    
+    // 删除节点5（有两个子节点，用左子树的最大值4替换）
+    assert(tree.remove(5));
+    assert(tree.size() == 10);
+    assert(!tree.contains(5));
+    
+    // 验证树仍然正确
+    assert(tree.contains(1));
+    assert(tree.contains(3));
+    assert(tree.contains(4));
+    assert(tree.contains(8));
+    assert(tree.contains(9));
+    assert(tree.contains(10));
+    assert(tree.contains(12));
+    assert(tree.contains(15));
+    assert(tree.contains(17));
+    assert(tree.contains(18));
+    
+    // 删除根节点10
+    assert(tree.remove(10));
+    assert(tree.size() == 9);
+    assert(!tree.contains(10));
+    
+    std::cout << "✓ 删除有两个子节点的节点测试通过\n";
+}
+
+void test_clear_and_reuse() {
+    std::cout << "\n=== 测试clear()和重用 ===\n";
+    BST<int> tree;
+    
+    // 填充数据
+    for (int i = 0; i < 20; ++i) {
+        tree.insert(i * 2);  // 插入偶数
     }
-    std::cout << std::endl;
+    assert(tree.size() == 20);
     
-    // 测试后置++
-    list::iterator it = list9.begin();
-    list::iterator it2 = it++;
-    assert(*it2 == 1);  // it2指向第一个元素
-    assert(*it == 11);  // it指向第二个元素
+    // 清空
+    tree.clear();
+    assert(tree.empty());
+    assert(tree.size() == 0);
     
-    // 测试--
-    it = list9.end();
-    --it;
-    assert(*it == 21);  // 指向最后一个元素
+    // 重新使用
+    for (int i = 0; i < 10; ++i) {
+        tree.insert(i * 3);  // 插入3的倍数
+    }
+    assert(tree.size() == 10);
     
-    // 测试箭头操作符的正确用法
-    it = list9.begin();
-    ++it;
-    int value = *it;  // 先解引用
-    assert(value == 11);
+    // 验证新数据
+    for (int i = 0; i < 10; ++i) {
+        assert(tree.contains(i * 3));
+    }
     
-    // 或者直接
-    assert(*it == 11);
+    std::cout << "✓ clear()和重用测试通过\n";
+}
+
+void test_string_bst() {
+    std::cout << "\n=== 测试字符串BST ===\n";
+    BST<std::string> tree;
     
-    std::cout << "迭代器测试通过！" << std::endl;
+    // 各种插入方式
+    std::string s1 = "apple";
+    std::string s2 = "banana";
+    std::string s3 = "cherry";
+    
+    // 左值插入
+    assert(tree.insert(s1));
+    assert(tree.contains("apple"));
+    
+    // 移动插入
+    assert(tree.insert(std::move(s2)));
+    assert(tree.contains("banana"));
+    assert(s2.empty());  // 被移动了
+    
+    // 字面量插入
+    assert(tree.insert("cherry"));
+    assert(tree.contains("cherry"));
+    
+    // 临时对象
+    assert(tree.insert(std::string("date")));
+    assert(tree.contains("date"));
+    
+    assert(tree.size() == 4);
+    
+    // 删除测试
+    assert(tree.remove("banana"));
+    assert(!tree.contains("banana"));
+    assert(tree.size() == 3);
+    
+    // 重复插入
+    assert(!tree.insert("apple"));
+    assert(tree.size() == 3);
+    
+    std::cout << "✓ 字符串BST测试通过\n";
+}
+
+void test_large_scale_random() {
+    std::cout << "\n=== 大规模随机测试 ===\n";
+    BST<int> tree;
+    std::vector<int> numbers;
+    
+    // 生成1000个随机数
+    for (int i = 0; i < 1000; ++i) {
+        numbers.push_back(i);
+    }
+    
+    // 随机打乱
+    std::random_shuffle(numbers.begin(), numbers.end());
+    
+    // 插入所有数字
+    for (int num : numbers) {
+        assert(tree.insert(num));
+    }
+    assert(tree.size() == 1000);
+    
+    // 验证所有数字都存在
+    for (int i = 0; i < 1000; ++i) {
+        assert(tree.contains(i));
+    }
+    
+    // 删除一半的数字
+    for (int i = 0; i < 500; ++i) {
+        assert(tree.remove(numbers[i]));
+    }
+    assert(tree.size() == 500);
+    
+    // 验证删除的正确性
+    for (int i = 0; i < 500; ++i) {
+        assert(!tree.contains(numbers[i]));
+    }
+    for (int i = 500; i < 1000; ++i) {
+        assert(tree.contains(numbers[i]));
+    }
+    
+    // 清空
+    tree.clear();
+    assert(tree.empty());
+    
+    std::cout << "✓ 大规模随机测试通过\n";
+}
+
+void test_edge_cases() {
+    std::cout << "\n=== 边界情况测试 ===\n";
+    
+    // 测试1: 空树操作
+    {
+        BST<int> tree;
+        assert(tree.empty());
+        assert(!tree.remove(0));
+        tree.clear();  // 空树clear应该没问题
+        assert(tree.empty());
+    }
+    
+    // 测试2: 单节点树
+    {
+        BST<int> tree;
+        tree.insert(42);
+        assert(tree.size() == 1);
+        assert(tree.remove(42));
+        assert(tree.empty());
+        assert(!tree.remove(42));  // 再次删除应该失败
+    }
+    
+    // 测试3: 连续插入删除
+    {
+        BST<int> tree;
+        for (int i = 0; i < 100; ++i) {
+            tree.insert(i);
+            assert(tree.contains(i));
+            assert(tree.remove(i));
+            assert(!tree.contains(i));
+            assert(tree.empty());
+        }
+    }
+    
+    // 测试4: 插入已删除的值
+    {
+        BST<int> tree;
+        tree.insert(100);
+        tree.remove(100);
+        assert(tree.insert(100));  // 应该可以重新插入
+        assert(tree.size() == 1);
+    }
+    
+    std::cout << "✓ 边界情况测试通过\n";
+}
+
+void test_move_semantics_simple() {
+    std::cout << "\n=== 移动语义测试 ===\n";
+    
+    BST<std::string> tree;
+    
+    // 测试移动插入
+    std::string large_str(1000, 'X');
+    tree.insert(std::move(large_str));
+    assert(tree.contains(std::string(1000, 'X')));
+    assert(large_str.empty());  // 确认被移动了
+    
+    // 测试拷贝插入
+    std::string small_str = "hello";
+    tree.insert(small_str);
+    assert(tree.contains("hello"));
+    assert(!small_str.empty());  // 确认没有被移动
+    
+    // 测试字面量和临时对象
+    tree.insert("world");
+    tree.insert(std::string("test"));
+    
+    assert(tree.size() == 4);
+    
+    std::cout << "✓ 移动语义测试通过\n";
+}
+
+int main() {
+    std::cout << "开始测试BST实现...\n\n";
+    
+    try {
+        test_basic_operations();
+        test_remove_leaf();
+        test_remove_one_child();
+        test_remove_two_children();
+        test_clear_and_reuse();
+        test_string_bst();
+        test_large_scale_random();
+        test_edge_cases();
+        test_move_semantics_simple();
+        
+        std::cout << "\n🎉 所有测试通过！BST实现完全正确。\n";
+        return 0;
+    } 
+    catch (const std::exception& e) {
+        std::cerr << "\n❌ 测试失败: " << e.what() << "\n";
+        return 1;
+    }
+    catch (const char* msg) {
+        std::cerr << "\n❌ 测试失败: " << msg << "\n";
+        return 1;
+    }
+    catch (...) {
+        std::cerr << "\n❌ 未知测试错误\n";
+        return 1;
+    }
 }

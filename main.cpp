@@ -51,15 +51,33 @@ public:
         auto slot=find_slot(key);
         if(*slot)return false;
         *slot=std::make_unique<node>(std::forward<U>(value));
+        ++node_count;
         return true;
     }
-    bool cotains(const T& key)const{
-        auto pnode=find_node(key);
-        if(pnode)return true;
-        return false;
+    bool contains(const T& key)const{
+        return find_node(key)!=nullptr;
     }
     bool remove(const T& key){
         auto slot=find_slot(key);
+        if(!(*slot))return false;
+        if(!(*slot)->left){
+            *slot=std::move((*slot)->right);
+        }else if(!(*slot)->right){
+            *slot=std::move((*slot)->left);
+        }else{
+            auto curr=&((*slot)->left);
+            while((*curr)->right){
+                curr=&((*curr)->right);
+            }
+            (*slot)->data=std::move((*curr)->data);
+            *curr=std::move((*curr)->left);
+        }
+        --node_count;
+        return true;
+    }
+    void clear(){
+        root.reset();
+        node_count=0;
     }
 };
 int main(){
