@@ -10,8 +10,8 @@ private:
     size_t front;    //前面出队，指向第一个元素，空为0
     size_t rear;     //后面入队,指向最后一个元素的下一位，空为0
     size_t capacity;
-    void resize(){
-        size_t newcap=capacity>=100?capacity*3/2:capacity*2;   //扩容策略：小于100时*2，大于100*时1.5
+    void resize(){            //push后若人满则触发扩容，扩容策略：小于100时*2，大于100*时1.5
+        size_t newcap=capacity>=100?capacity*3/2:capacity*2;   
         auto newarr=std::make_unique<T[]>(newcap);
         size_t curr=front;
         for(size_t i=0;i<capacity;++i){       //数据迁移
@@ -67,6 +67,33 @@ public:
         for(size_t i=front;i!=rear;i=(i+1)%capacity){
             std::cout<<arr[i]<<"  ";
         }
+    }
+};
+template<typename T,int MAXSIZE=100>
+class stack{
+private:
+    T arr[MAXSIZE];
+    int top;
+public:
+    stack()
+        :top(-1){}
+    bool empty()const{return top==-1;}
+    template<typename U>
+    void push(U&& value){
+        if(top>=MAXSIZE-1)throw std::out_of_range("stack flow");
+        arr[++top]=std::forward<U>(value);
+    }
+    T pop(){
+        if(top<0)throw std::out_of_range("stack empty");
+        return arr[top--];
+    }
+    const T& get_top()const{
+        if(top<0)throw std::out_of_range("stack empty");
+        return arr[top];
+    }
+    T& get_top(){
+        if(top<0)throw std::out_of_range("stack empty");
+        return arr[top];
     }
 };
 template<typename T>
@@ -145,7 +172,7 @@ public:
         root.reset();
         node_count=0;
     }
-    void BFS(){
+    void breadth_traversal()const{      //接口函数，迭代算法(queue)
         if(!root)return;
         queue<const node*> q;
         q.push(root.get());
@@ -157,17 +184,60 @@ public:
             std::cout<<curr->data<<"\n";
         }
     }
+    void depth_traversal()const{        //接口函数，递归算法
+        std::cout<<"中序遍历：\n";
+        const node* curr=root.get();
+        LDR(curr);
+    }
+    void LDR(const node* curr)const{    //辅助函数，递归算法
+        if(!curr)return;
+        if(curr->left)LDR(curr->left.get());
+        std::cout<<curr->data<<"\n";
+        if(curr->right)LDR(curr->right.get());       
+    }
+    void DLR2()const{                   //接口函数，迭代算法(stack)
+        if(!root)return;
+        stack<const node*> s;
+        const node* curr=root.get();
+        s.push(curr);
+        while(!s.empty()){
+            curr=s.get_top();
+            s.pop();
+            if(curr->right)s.push(curr->right.get());
+            if(curr->left)s.push(curr->left.get());
+            std::cout<<curr->data<<"\n";
+        }
+    }
+    void LDR2()const{                   //接口函数，迭代算法(stack)
+        if(!root)return;
+        stack<const node*> s;
+        const node* curr=root.get();
+        s.push(curr);
+        while(!s.empty()){
+            curr=s.get_top();
+            if(curr->right){
+                s.push(curr->right.get());
+            }else if(curr->left){
+                s.push(curr->left.get());
+            }else{
+                std::cout<<curr->data<<"\n";
+            }
+            s.pop();
+        }
+    }
 };
 int main(){
     BST<int> bst;
-    bst.insert('v');
-    bst.insert('p');
-    bst.insert('w');
-    bst.insert('d');
-    bst.insert('c');
-    bst.insert('g');
-    bst.insert('k');
-    bst.insert('n');
-    bst.insert('a');
-    bst.BFS();
+    bst.insert(95);
+    bst.insert(15);
+    bst.insert(5);
+    bst.insert(35);
+    bst.insert(75);
+    bst.insert(25);
+    bst.insert(25);
+    bst.insert(35);
+    bst.insert(225);
+    bst.insert(115);
+    bst.insert(155);
+    bst.LDR2();
 }
