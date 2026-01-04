@@ -1,35 +1,36 @@
 #include<iostream>
-#include<queue>
-class MyStack {
+#include<stack>
+class MyQueue {
 private:
-    std::queue<int> q;
+    std::stack<int> via;
+    std::stack<int> stk;
 public:
-    MyStack() {
-        
+    MyQueue() {
+    
     }
     
     void push(int x) {
-        q.push(x);
-        int size=q.size();
-        while(--size){
-            int temp=q.front();
-            q.pop();
-            q.push(temp);
+        stk.push(x);
+        while(!stk.empty()){
+            int temp=stk.top();
+            stk.pop();
+            via.push(temp);
         }
+        via.swap(stk);
     }
     
     int pop() {
-        int p=q.front();
-        q.pop();
-        return p;
+        int value=stk.top();
+        stk.pop();
+        return value;
     }
     
-    int top() {
-        return q.front();
+    int peek() {
+        return stk.top();
     }
     
     bool empty() {
-        return q.empty();
+        return stk.empty();
     }
 };
 int main(){
