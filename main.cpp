@@ -214,20 +214,15 @@ public:
         const node* curr=root.get();
         s.push(curr);
         bool backflag=false;
-        while(!s.empty()){
-            curr=s.get_top();           //curr为const node*类型
-            if((!backflag)&&(curr->left)){
-                s.push(curr->left.get());
-                backflag=false;
-                continue;
+        while(curr||!s.empty()){
+            while(curr){
+                s.push(curr);
+                curr=curr->left.get();
             }
-            std::cout<<curr->data<<"\n";
+            curr=s.get_top();
             s.pop();
-            backflag=true;
-            if(curr->right){
-                s.push(curr->right.get());
-                backflag=false;
-            }         
+            std::cout<<curr->data<<"\n";
+            curr=curr->right.get();
         }
     }
 };
@@ -244,5 +239,5 @@ int main(){
     bst.insert(225);
     bst.insert(115);
     bst.insert(155);
-    bst.LDR2();
+    bst.LDR2();  //morris
 }
