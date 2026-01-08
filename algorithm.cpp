@@ -26,7 +26,6 @@ int erow=n-1,ecol=m-1;
 // int dcol[4]={0,1,0,-1};
 int drow[4]={0,-1,0,1};    
 int dcol[4]={-1,0,1,0};
-//vector<vector<bool>> visited(n, vector<bool>(m, false));
 
 bool canGo(int row, int col,const vector<vector<bool>>& visited) {
     return row >= 0 && row < n &&
@@ -84,6 +83,35 @@ void dfs(int srow,int scol){
                 visited[nrow][ncol]=true;
                 s.push({nrow,ncol,depth+1});
             }
+        }
+    }
+}
+
+void backtrack(int row, int col, int depth, vector<vector<bool>>& visited, vector<pair<int, int>>& path) {
+    // 1. 终止条件：到达终点
+    if (row == erow && col == ecol) {
+        cout << "找到一条路径！长度: " << depth << endl;
+        // 如果想看具体路径，可以遍历 path
+        return;
+    }
+
+    // 2. 遍历所有选择（上下左右）
+    for (int i = 0; i < 4; ++i) {
+        int nrow = row + drow[i];
+        int ncol = col + dcol[i];
+
+        // 3. 约束检查
+        if (canGo(nrow, ncol, visited)) {
+            // --- 做选择 ---
+            visited[nrow][ncol] = true;
+            path.push_back({nrow, ncol});
+
+            // --- 进入递归 ---
+            backtrack(nrow, ncol, depth + 1, visited, path);
+
+            // --- 撤销选择 (这就是回溯的核心！) ---
+            path.pop_back();
+            visited[nrow][ncol] = false; 
         }
     }
 }
