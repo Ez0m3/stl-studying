@@ -1,72 +1,27 @@
-#include <iostream>
-#include <vector>
-#include <stack>
 
-bool isSafe(std::vector<std::vector<int>>& board, int row, int col, int n) {
-    for (int i = 0; i < col; i++) {
-        if (board[row][i]) return false;
-    }
-    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
-        if (board[i][j]) return false;
-    }
-    for (int i = row, j = col; i < n && j >= 0; i++, j--) {
-        if (board[i][j]) return false;
-    }
-    return true;
-}
-
-bool solveNQueens(int n) {
-    std::vector<std::vector<int>> board(n, std::vector<int>(n, 0));
-    std::stack<std::pair<int, int>> stk;
-    int col = 0;
+def dijkstra(graph, start):
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    pq = [(0, start)]  # 优先队列（距离, 节点）
     
-    while (col >= 0) {
-        bool placed = false;
-        int row = (col == 0) ? 0 : stk.top().first + 1;
+    while pq:
+        current_dist, current_node = heapq.heappop(pq)
+        if current_dist > distances[current_node]:
+            continue
         
-        for (; row < n; row++) {
-            if (isSafe(board, row, col, n)) {
-                if (col < n - 1) {
-                    stk.push({row, col});
-                    board[row][col] = 1;
-                    placed = true;
-                    break;
-                } else {
-                    board[row][col] = 1;
-                    return true;
-                }
-            }
-        }
-        
-        if (placed) {
-            col++;
-        } else {
-            if (stk.empty()) break;
-            auto last = stk.top();
-            stk.pop();
-            board[last.first][last.second] = 0;
-            col = last.second;
-            row = last.first;
-            while (row >= n - 1 && !stk.empty()) {
-                last = stk.top();
-                stk.pop();
-                board[last.first][last.second] = 0;
-                col = last.second;
-                row = last.first;
-            }
-            if (row >= n - 1) continue;
-            col = last.second;
-        }
-    }
-    return false;
-}
+        for neighbor, weight in graph[current_node].items():
+            distance = current_dist + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(pq, (distance, neighbor))
+    
+    return distances
 
-int main() {
-    int n = 8;
-    if (solveNQueens(n)) {
-        std::cout << "Solution exists." << std::endl;
-    } else {
-        std::cout << "No solution." << std::endl;
-    }
-    return 0;
+graph = {
+    'A': {'B': 4, 'C': 2},
+    'B': {'D': 3, 'E': 1},
+    'C': {'B': 1, 'D': 5},
+    'D': {'E': 2},
+    'E': {}
 }
+print(dijkstra(graph, 'A'))  # 输出：{'A':0, 'B':3, 'C':2, 'D':6, 'E':4}
