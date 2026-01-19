@@ -1,18 +1,23 @@
-#include<iostream>
-#include<thread>
-void print(int x){
-    for(int i=0;i<1000;++i){
-        if(x>=0){
-            std::cout<<x+i<<std::endl;
-        }else{
-            std::cout<<x-i<<std::endl;
-        }
+#include <iostream>
+#include <thread>
+#include <mutex>
+std::mutex mtx;
+std::size_t NUM=1000000;
+void add(int* p){
+    for(std::size_t i=0;i<NUM;++i){
+        mtx.lock();
+        ++(*p);
+        mtx.unlock();
     }
 }
+
 int main(){
-    std::thread thread1(print,1);
-    std::thread thread2(print,-1);
-    thread1.join();
-    thread2.join();
-    return 0;
+    int x=0;
+    int *p=&x;
+    std::thread t1(add,p);
+    std::thread t2(add,p);
+    std::cout<<x<<"\n";
+    if(t1.joinable())t1.join();
+    if(t2.joinable())t2.join();
+    std::cout<<x<<"\n";
 }
